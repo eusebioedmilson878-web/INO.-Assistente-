@@ -1,30 +1,19 @@
-name: Build APK
-
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Baixar projeto
-        uses: actions/checkout@v4
-
-      - name: Configurar Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Dar permissão ao Gradle
-        run: chmod +x gradlew
-
-      - name: Compilar APK Debug
-        run: ./gradlew assembleDebug --no-daemon
-
-      - name: Disponibilizar APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: INO-V18.4-APK
-          path: app/build/outputs/apk/debug/*.apk
+{
+"name": "Build APK",
+"on": ["push", "workflow_dispatch"],
+"jobs": {
+"build": {
+"runs-on": "ubuntu-latest",
+"steps": [
+{"uses": "actions/checkout@v4"},
+{"name": "Descompactar projeto", "run": "unzip -o *.zip -d src"},
+{"name": "Corrigir descricao do servico", "run": "sed -i 's|android:description=.*|android:description=\"@string/ino_accessibility_description\" />|' src/app/src/main/res/xml/ino_accessibility_service.xml && sed -i 's|</resources>|<string name=\"ino_accessibility_description\">Permite ao INO executar ações na interface de aplicativos quando o usuário autorizar o serviço.</string></resources>|' src/app/src/main/res/values/strings.xml"},
+{"uses": "actions/setup-java@v4", "with": {"distribution": "temurin", "java-version": "17"}},
+{"name": "Aceitar licencas", "run": "yes | sdkmanager --licenses || true"},
+{"uses": "gradle/actions/setup-gradle@v4", "with": {"gradle-version": "8.7"}},
+{"name": "Compilar APK", "working-directory": "src", "run": "gradle :app:assembleDebug --console=plain > build.log 2>&1 || { grep -n -E 'error:|What went wrong|Execution failed|FAILURE|Could not|cannot find symbol' -A4 build.log | head -80; exit 1; }"},
+{"uses": "actions/upload-artifact@v4", "with": {"name": "INO-V18.4-debug-apk", "path": "src/app/build/outputs/apk/debug/app-debug.apk"}}
+]
+}
+}
+}
