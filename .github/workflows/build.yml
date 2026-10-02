@@ -9,6 +9,7 @@
 {"name": "Descompactar projeto", "run": "unzip -o *.zip -d src"},
 {"name": "Corrigir descricao do servico", "run": "sed -i 's|android:description=.*|android:description=\"@string/ino_accessibility_description\" />|' src/app/src/main/res/xml/ino_accessibility_service.xml && sed -i 's|</resources>|<string name=\"ino_accessibility_description\">Permite ao INO executar ações na interface de aplicativos quando o usuário autorizar o serviço.</string></resources>|' src/app/src/main/res/values/strings.xml"},
 {"name": "Corrigir ACTION_IME_ENTER", "run": "sed -i 's|field.performAction(AccessibilityNodeInfo.ACTION_IME_ENTER);|if(android.os.Build.VERSION.SDK_INT>=30) field.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_IME_ENTER.getId());|' src/app/src/main/java/com/ino/assistant/InoAccessibilityService.java"},
+{"name": "Corrigir JSONException", "run": "sed -i 's|catch(Exception e){out.put(\"status\",\"FAILED\");return out.toString();}|catch(Exception e){try{out.put(\"status\",\"FAILED\");}catch(Exception ignored){}return out.toString();}|' src/app/src/main/java/com/ino/assistant/MainActivity.java"},
 {"uses": "actions/setup-java@v4", "with": {"distribution": "temurin", "java-version": "17"}},
 {"name": "Aceitar licencas", "run": "yes | sdkmanager --licenses || true"},
 {"uses": "gradle/actions/setup-gradle@v4", "with": {"gradle-version": "8.7"}},
